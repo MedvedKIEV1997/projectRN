@@ -1,61 +1,86 @@
+import { StatusBar } from 'expo-status-bar';
+import { useState } from 'react';
 import {
     Button,
-    Platform,
-    StatusBar,
+    FlatList,
+    Pressable,
     StyleSheet,
     Text,
-    TextInput,
     View
 } from 'react-native';
+import GoalInput from './components/GoalInput';
+import GoalItem from './components/GoalItem';
 
 export default App = () => {
-    return (
-        <View style={styles.AndroidSafeArea}>
-            <View style={styles.appContainer}>
-                <View style={styles.inputContainer}>
-                    <TextInput
-                        placeholder="Your next goal😉"
-                        style={styles.textInput}
-                    />
+    const [goals, setGoals] = useState([]);
+    const [visibility, setVisibility] = useState(false);
 
-                    <Button title="Add" />
-                </View>
+    const modalVisibilityHandler = () => {
+        setVisibility((visibility) => !visibility);
+    };
+
+    const addGoalHandler = (input) => {
+        if (input) {
+            setGoals((currentGoals) => [
+                { text: input, key: input + Math.random() },
+                ...currentGoals
+            ]);
+        }
+    };
+
+    const deleteGoalHandler = (key) => {
+        console.log('deleted');
+        setGoals((currentGoals) =>
+            currentGoals.filter((goal) => goal.key !== key)
+        );
+    };
+
+    return (
+        <>
+            <StatusBar style="light" />
+            <View style={styles.appContainer}>
+                <GoalInput
+                    modalVisibilityHandler={modalVisibilityHandler}
+                    addGoalHandler={addGoalHandler}
+                    visibility={visibility}
+                />
                 <View style={styles.goalsContainer}>
-                    <Text>List of goals</Text>
+                    <FlatList
+                        data={goals}
+                        renderItem={({ item }) => (
+                            <GoalItem
+                                item={item}
+                                deleteGoalHandler={deleteGoalHandler}
+                            />
+                        )}
+                    />
+                </View>
+                <View style={styles.buttonContainer}>
+                    <Button
+                        title="+"
+                        color="#8e54db"
+                        onPress={modalVisibilityHandler}
+                    />
                 </View>
             </View>
-        </View>
+        </>
     );
 };
 
 const styles = StyleSheet.create({
-    AndroidSafeArea: {
-        flex: 1,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0
-    },
     appContainer: {
         padding: 50,
+        paddingBottom: 16,
         paddingHorizontal: 16,
-        flex: 1
-    },
-    inputContainer: {
         flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 24,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc'
-    },
-    textInput: {
-        borderWidth: 2,
-        borderRadius: 5,
-        padding: 8,
-        marginRight: 10,
-        width: '80%',
-        borderColor: '#ccc'
+        position: 'relative'
     },
     goalsContainer: {
-        flex: 5
+        flex: 1
+    },
+    buttonContainer: {
+        width: 100,
+        marginTop: 16,
+        alignSelf: 'center'
     }
 });
